@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <netinet/in.h> // Add this header for sockaddr_in and INADDR_ANY
+#include <sys/socket.h>
+
+#define PORT 8080
+
+int main() {
+    int server_fd, new_socket, valread;
+    struct sockaddr_in address;
+    int addrlen = sizeof(address);
+
+    // Create a socket
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+        perror("socket failed");
+        exit(EXIT_FAILURE);
+    }
+
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(PORT);
+
+    // Bind the socket to a specific IP and port
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
+        perror("bind failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // Listen for incoming connections
+    if (listen(server_fd, 3) < 0) {
+        perror("listen failed");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Server listening on port %d...\n", PORT);
+
+    while (1) {
+        // Accept a new connection
+        if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0) {
+            perror("accept failed");
+            exit(EXIT_FAILURE);
+        }
+
+        // Generate a random number in the range [50000, 80000]
+        int random_number = 50000 + rand() % (80000 - 50000 + 1);
+
+        // Send the random number to the client
+        send(new_socket, &random_number, sizeof(random_number), 0);
+        printf("Sent: %d\n", random_number);
+
+        close(new_socket);
+    }
+
+    return 0;
+}

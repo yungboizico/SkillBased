@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+int main() {
+    pid_t pid1, pid2, pid3;
+
+    // Fork the first child
+    pid1 = fork();
+
+    if (pid1 < 0) {
+        fprintf(stderr, "Failed to create the first child process.\n");
+        return 1;
+    } else if (pid1 == 0) {
+        // This code will be executed by the first child
+        printf("First child process (PID: %d) says: Interrupt message 1\n", getpid());
+        return 0;
+    }
+
+    // Fork the second child
+    pid2 = fork();
+
+    if (pid2 < 0) {
+        fprintf(stderr, "Failed to create the second child process.\n");
+        return 1;
+    } else if (pid2 == 0) {
+        // This code will be executed by the second child
+        printf("Second child process (PID: %d) says: Interrupt message 2\n", getpid());
+        return 0;
+    }
+
+    // Fork the third child
+    pid3 = fork();
+
+    if (pid3 < 0) {
+        fprintf(stderr, "Failed to create the third child process.\n");
+        return 1;
+    } else if (pid3 == 0) {
+        // This code will be executed by the third child
+        printf("Third child process (PID: %d) says: Interrupt message 3\n", getpid());
+        return 0;
+    }
+
+    // This code will be executed by the parent
+    printf("Parent process (PID: %d) says: All child processes created.\n", getpid());
+
+    // Wait for all child processes to complete
+    wait(NULL);
+    wait(NULL);
+    wait(NULL);
+
+    return 0;
+}
